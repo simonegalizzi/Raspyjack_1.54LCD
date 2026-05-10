@@ -119,7 +119,7 @@ else:
     LCD_RST_PIN = 27
     LCD_DC_PIN = 25
     LCD_CS_PIN = 8
-    LCD_BL_PIN = 24
+    LCD_BL_PIN = 18
 
     SPI = spidev.SpiDev(0, 0)
 
@@ -139,7 +139,8 @@ else:
         GPIO.setup(LCD_DC_PIN, GPIO.OUT)
         GPIO.setup(LCD_CS_PIN, GPIO.OUT)
         GPIO.setup(LCD_BL_PIN, GPIO.OUT)
-        SPI.max_speed_hz = 9000000
+        SPI.BL_freq = 1000
+        SPI.max_speed_hz = 40000000
         SPI.mode = 0b00
         return 0
 
