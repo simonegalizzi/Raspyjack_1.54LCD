@@ -37,12 +37,12 @@ class GPIOConfig:
             self._pins = {
                 "KEY1_PIN": 21,
                 "KEY2_PIN": 20,
-                "KEY3_PIN": 16,
-                "KEY_DOWN_PIN": 19,
-                "KEY_LEFT_PIN": 5,
-                "KEY_PRESS_PIN": 13,
-                "KEY_RIGHT_PIN": 26,
-                "KEY_UP_PIN": 6
+                "KEY3_PIN": 15,
+                "KEY_DOWN_PIN": 5,
+                "KEY_LEFT_PIN": 6,
+                "KEY_PRESS_PIN": 3,
+                "KEY_RIGHT_PIN": 13,
+                "KEY_UP_PIN": 16
             }
             self._config_data = {"PINS": self._pins}
         except Exception as e:
