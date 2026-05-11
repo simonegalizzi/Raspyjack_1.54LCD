@@ -1,38 +1,48 @@
 {
-    "DISPLAY": {
-        "type": "ST7735_128",
-        "supported_types": ["ST7735_128", "ST7789_240"],
-        "flip": false
-    },
-    "COLORS": {
-        "BACKGROUND": "#000000",
-        "BORDER": "#05ff00",
-        "GAMEPAD": "#141494",
-        "GAMEPAD_FILL": "#eeeeee",
-        "SELECTED_TEXT": "#00ff55",
-        "SELECTED_TEXT_BACKGROUND": "#2d0fff",
-        "TEXT": "#05ff00"
-    },
-    "LOCK": {
-        "auto_lock_seconds": 0,
-        "enabled": false,
-        "mode": "pin",
-        "pin_hash": "",
-        "sequence_hash": "",
-        "sequence_length": 6
-    },
-    "PATHS": {
-        "IMAGEBROWSER_START": "/root/Raspyjack/img/",
-        "SCREENSAVER_GIF": "/root/Raspyjack/img/screensaver/default.gif"
-    },
-    "PINS": {
-        "KEY1_PIN": 21,
-        "KEY2_PIN": 20,
-        "KEY3_PIN": 16,
-        "KEY_DOWN_PIN": 19,
-        "KEY_LEFT_PIN": 5,
-        "KEY_PRESS_PIN": 13,
-        "KEY_RIGHT_PIN": 26,
-        "KEY_UP_PIN": 6
-    }
+  "DISPLAY": {
+    "type": "ST7789_240",
+    "flip": false
+  },
+  "LCD": {
+    "DC": 22,
+    "RST": 27,
+    "BL": -1,
+    "CS": 8,
+    "MOSI": 10,
+    "SCLK": 11
+  },
+  "PINS": {
+    "KEY_UP_PIN": 5,
+    "KEY_DOWN_PIN": 16,
+    "KEY_LEFT_PIN": 6,
+    "KEY_RIGHT_PIN": 13,
+    "KEY_PRESS_PIN": 3,
+    "KEY1_PIN": 21,
+    "KEY2_PIN": 20,
+    "KEY3_PIN": 26
+  },
+  "PATHS": {
+    "IMAGEBROWSER_START": "/root/",
+    "SCREENSAVER_GIF": "/root/Raspyjack/img/screensaver/default.gif"
+  },
+  "COLORS": {
+    "BACKGROUND": "#000000",
+    "TEXT": "#00FF41",
+    "SELECTED_TEXT": "#FFFFFF",
+    "SELECTED_TEXT_BACKGROUND": "#003300",
+    "BORDER": "#00FF41"
+  },
+  "LOCK": {
+    "enabled": false,
+    "pin_hash": "",
+    "sequence_hash": "",
+    "sequence_length": 4,
+    "auto_lock_seconds": 0,
+    "random_screensaver": false
+  },
+  "TOOLBAR": {
+    "show_clock": true
+  }
 }
+
+
