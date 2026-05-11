@@ -1,3 +1,4 @@
+<img width="1840" height="4080" alt="raspyjack" src="https://github.com/user-attachments/assets/8d24349d-7af3-4970-9fec-2fc1051eac8d" />
 <p align="center">
   <img src="https://img.shields.io/badge/platform-Raspberry%20Pi-red?style=flat-square&logo=raspberry-pi">
   <img src="https://img.shields.io/badge/code-python3-yellow?style=flat-square&logo=python">
