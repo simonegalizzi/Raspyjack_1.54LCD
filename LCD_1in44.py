@@ -318,7 +318,7 @@ class LCD:
 
         # VCOM Setting (higher value reduces ghosting/image retention)
         self.LCD_WriteReg(0xBB)
-        self.LCD_WriteData_8bit(0x2B)
+        self.LCD_WriteData_8bit(0x19)
 
         # LCM Control
         self.LCD_WriteReg(0xC0)
@@ -330,7 +330,7 @@ class LCD:
 
         # VRH Set (slightly higher for cleaner transitions)
         self.LCD_WriteReg(0xC3)
-        self.LCD_WriteData_8bit(0x15)
+        self.LCD_WriteData_8bit(0x12)
 
         # VDV Set
         self.LCD_WriteReg(0xC4)
@@ -338,7 +338,7 @@ class LCD:
 
         # Frame Rate Control in Normal Mode (0x01 = ~111Hz, reduces ghosting)
         self.LCD_WriteReg(0xC6)
-        self.LCD_WriteData_8bit(0x01)
+        self.LCD_WriteData_8bit(0x0F)
 
         # Power Control 1
         self.LCD_WriteReg(0xD0)
@@ -381,6 +381,10 @@ class LCD:
 
         # Display Inversion On (ST7789 needs this for correct colors)
         self.LCD_WriteReg(0x21)
+        
+        self.LCD_WriteReg(0x11)
+        
+        self.LCD_WriteReg(0x29)
 
     # ------------------------------------------------------------------
     # Dispatch to the correct init register sequence
@@ -480,7 +484,7 @@ class LCD:
         if (LCD_Config.GPIO_Init() != 0):
             return -1
 
-        if self.display_type == "CARDPUTER_320":
+        if self.display_type in ("CARDPUTER_320", "ST7789_240"):
             return 0
 
         # Set SPI speed based on display type
@@ -535,7 +539,7 @@ class LCD:
         self.LCD_WriteReg(0x2C)
 
     def LCD_Clear(self):
-        if self.display_type == "CARDPUTER_320":
+        if self.display_type in ("CARDPUTER_320", "ST7789_240"):
             LCD_Config.fb_write(b'\x00' * LCD_Config.FB_SIZE)
             return
         _buffer = [0x00]*(self.width * self.height * 2)
@@ -553,7 +557,7 @@ class LCD:
         if imwidth != self.width or imheight != self.height:
             Image = Image.resize((self.width, self.height))
 
-        if self.display_type == "CARDPUTER_320":
+        if self.display_type in ("CARDPUTER_320", "ST7789_240"):
             img = Image.convert("RGB")
             arr = np.asarray(img)
             r = (arr[..., 0].astype(np.uint16) >> 3) << 11
