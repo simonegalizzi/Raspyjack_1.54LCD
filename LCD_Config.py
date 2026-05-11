@@ -48,7 +48,7 @@ if _DISPLAY_TYPE != "CARDPUTER_320":
     try:
         with open("/sys/class/graphics/fb0/name", "r") as _fb:
             if "st7789v_m5st" in _fb.read():
-                _DISPLAY_TYPE = "CARDPUTER_320"
+                _DISPLAY_TYPE = "ST7735_128"
     except Exception:
         pass
 
@@ -64,9 +64,9 @@ if _DISPLAY_TYPE == "CARDPUTER_320":
     LCD_CS_PIN = -1
     LCD_BL_PIN = -1
 
-    FB_DEVICE = os.environ.get("RJ_FB_DEVICE", "/dev/fb0")
-    FB_WIDTH = 320
-    FB_HEIGHT = 170
+    FB_DEVICE = os.environ.get("RJ_FB_DEVICE", "/dev/fb1")
+    FB_WIDTH = 240
+    FB_HEIGHT = 240
     FB_BPP = 16
     FB_SIZE = FB_WIDTH * FB_HEIGHT * (FB_BPP // 8)
 
@@ -94,7 +94,9 @@ if _DISPLAY_TYPE == "CARDPUTER_320":
     def fb_write(data: bytes):
         fb = _open_fb()
         fb.seek(0)
-        fb.write(data)
+        fb.write(data[:FB_SIZE])
+        fb.flush()
+        os.fsync(_fb_fd)
 
     def epd_digital_write(pin, value):
         pass
@@ -106,42 +108,71 @@ if _DISPLAY_TYPE == "CARDPUTER_320":
         pass
 
     def GPIO_Init():
+        import RPi.GPIO as GPIO
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        # Non fare setup di RST/DC — gestiti dal driver fbtft
+        # Solo BL se necessario
         _open_fb()
         return 0
 
 else:
-    # ===================================================================
-    # Standard Raspberry Pi: SPI + GPIO for Waveshare HAT displays
-    # ===================================================================
-    import spidev
-    import RPi.GPIO as GPIO
+    # Spotpear 1.54" su framebuffer /dev/fb1 (fbtft occupa SPI)
+    import mmap
+    import struct
 
     LCD_RST_PIN = 27
-    LCD_DC_PIN = 25
-    LCD_CS_PIN = 8
-    LCD_BL_PIN = 18
+    LCD_DC_PIN  = 24
+    LCD_CS_PIN  =  8
+    LCD_BL_PIN  = 24
 
-    SPI = spidev.SpiDev(0, 0)
+    FB_DEVICE = "/dev/fb1"
+    FB_WIDTH  = 240
+    FB_HEIGHT = 240
+    FB_BPP    = 16
+    FB_SIZE   = FB_WIDTH * FB_HEIGHT * (FB_BPP // 8)
+
+    _fb_fd   = None
+    _fb_mmap = None
+
+    class _SpiStub:
+        max_speed_hz = 0
+        mode = 0
+        def writebytes(self, data):
+            pass
+
+    SPI = _SpiStub()
+
+    def _open_fb():
+        global _fb_fd, _fb_mmap
+        if _fb_mmap is not None:
+            return _fb_mmap
+        _fb_fd   = os.open(FB_DEVICE, os.O_RDWR)
+        _fb_mmap = mmap.mmap(_fb_fd, FB_SIZE, mmap.MAP_SHARED,
+                             mmap.PROT_WRITE | mmap.PROT_READ)
+        return _fb_mmap
+
+    def fb_write(data: bytes):
+        fb = _open_fb()
+        fb.seek(0)
+        fb.write(data[:FB_SIZE])
 
     def epd_digital_write(pin, value):
-        GPIO.output(pin, value)
+        pass
 
     def Driver_Delay_ms(xms):
         time.sleep(xms / 1000.0)
 
     def SPI_Write_Byte(data):
-        SPI.writebytes(data)
+        pass
 
     def GPIO_Init():
-        GPIO.setmode(GPIO.BCM)
+        import RPi.GPIO as GPIO
         GPIO.setwarnings(False)
-        GPIO.setup(LCD_RST_PIN, GPIO.OUT)
-        GPIO.setup(LCD_DC_PIN, GPIO.OUT)
-        GPIO.setup(LCD_CS_PIN, GPIO.OUT)
-        GPIO.setup(LCD_BL_PIN, GPIO.OUT)
-        SPI.BL_freq = 1000
-        SPI.max_speed_hz = 40000000
-        SPI.mode = 0b00
+        GPIO.setmode(GPIO.BCM)
+        # Non fare setup di RST/DC — gestiti dal driver fbtft
+        # Solo BL se necessario
+        _open_fb()
         return 0
 
 ### END OF FILE ###
