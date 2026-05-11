@@ -1,0 +1,17 @@
+[Unit]
+Description=RaspyJack UI Service
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/Raspyjack
+ExecStartPre=/bin/bash -c 'until [ -e /dev/fb1 ]; do sleep 0.5; done'
+ExecStart=/usr/bin/python3 /root/Raspyjack/raspyjack.py
+Restart=on-failure
+User=root
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/root/Raspyjack
+
+[Install]
+WantedBy=multi-user.target
