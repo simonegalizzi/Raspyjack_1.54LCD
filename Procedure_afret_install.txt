@@ -1,0 +1,86 @@
+1) wget https://cdn.static.spotpear.com/uploads/download/diver/gm154/spotpear_240x240_st7789_lcd1inch54.dtbo
+   cp spotpear_240x240_st7789_lcd1inch54.dtbo /boot/overlays/
+
+2) sudo cp /root/Raspyjack/config.txt /boot/firmware/
+
+3) reboot
+
+4) change config pin payloads...terminal
+
+python3 - <<'EOF'
+import os, re, glob
+
+# Trova tutti i file payload con PINS hardcoded Waveshare
+files = glob.glob("/root/Raspyjack/payloads/**/*.py", recursive=True)
+
+# Il blocco da inserire dopo gli import
+PINS_LOADER = '''
+# --- Spotpear pin loader (auto-patch) ---
+def _load_pins():
+    import json as _json, os as _os
+    _map = {"KEY_UP_PIN":"UP","KEY_DOWN_PIN":"DOWN","KEY_LEFT_PIN":"LEFT",
+            "KEY_RIGHT_PIN":"RIGHT","KEY_PRESS_PIN":"OK",
+            "KEY1_PIN":"KEY1","KEY2_PIN":"KEY2","KEY3_PIN":"KEY3"}
+    _def = {"UP":6,"DOWN":19,"LEFT":5,"RIGHT":26,"OK":13,"KEY1":21,"KEY2":20,"KEY3":16}
+    for _p in ["/root/Raspyjack/gui_conf.json"]:
+        try:
+            with open(_p) as _f:
+                _d = _json.load(_f).get("PINS", {})
+            _r = {v: _d[k] for k, v in _map.items() if k in _d}
+            if _r: return _r
+        except Exception:
+            pass
+    return _def
+'''
+
+# Pattern PINS Waveshare hardcoded
+PINS_PATTERN = re.compile(
+    r'PINS\s*=\s*\{\s*["\']UP["\']\s*:\s*6.*?["\']KEY3["\']\s*:\s*16\s*,?\s*\}',
+    re.DOTALL
+)
+
+PINS_REPLACEMENT = '''PINS = _load_pins()'''
+
+patched = 0
+skipped = 0
+
+for fpath in files:
+    if '_pins_helper.py' in fpath:
+        continue
+    try:
+        with open(fpath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        if '"UP": 6' not in content and "'UP': 6" not in content:
+            skipped += 1
+            continue
+        
+        # Inserisci il loader prima della prima occorrenza di PINS =
+        if '_load_pins' not in content:
+            # Trova posizione dopo gli import
+            insert_pos = content.rfind('\nimport ')
+            if insert_pos == -1:
+                insert_pos = content.rfind('\nfrom ')
+            if insert_pos == -1:
+                skipped += 1
+                continue
+            # Trova fine della riga
+            end_of_line = content.find('\n', insert_pos + 1)
+            content = content[:end_of_line+1] + PINS_LOADER + content[end_of_line+1:]
+        
+        # Sostituisci PINS = {...}
+        new_content = PINS_PATTERN.sub(PINS_REPLACEMENT, content)
+        
+        if new_content != content:
+            with open(fpath, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            patched += 1
+            print(f"  [OK] {os.path.basename(fpath)}")
+        else:
+            skipped += 1
+            
+    except Exception as e:
+        print(f"  [ERR] {fpath}: {e}")
+
+print(f"\nPatchati: {patched}, Saltati: {skipped}")
+EOF   
